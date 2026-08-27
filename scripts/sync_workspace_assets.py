@@ -27,7 +27,7 @@ def copy_images(source: Path, destination: Path) -> None:
     if not source.exists():
         return
     for candidate in source.rglob("*"):
-        if not candidate.is_file() or candidate.suffix.lower() not in IMAGE_SUFFIXES:
+        if candidate.is_symlink() or not candidate.is_file() or candidate.suffix.lower() not in IMAGE_SUFFIXES:
             continue
         relative = candidate.relative_to(source)
         target = destination / relative
