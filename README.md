@@ -4,39 +4,60 @@ Deutsch | [English](README.en.md)
 
 ## Rolle
 
-`ShellRPG-cdn` ist der oeffentliche Asset- und Distributionsendpunkt fuer
-kuratiertes ShellRPG-Material. Der Endpunkt liefert keine autoritative
-Spielmechanik, sondern dient als Quelle fuer Web- und perspektivisch weitere
-public-safe Medienpfade.
+`ShellRPG-cdn` ist ausschließlich der öffentliche **Bild-Endpunkt von ShellRPG-www**.
+Er enthält keine autoritative Spielmechanik, keine Wiki-Inhalte, keine Client-
+Distribution und keine allgemeinen Download-/Anwendungsdateien.
+
+Aktiver Payload-Scope:
+
+```text
+assets/www/public/media/**
+```
+
+Zulässig sind nur Bildformate, die der WWW-Pipeline ausdrücklich akzeptiert
+(PNG, JPEG, GIF, WebP, SVG und ICO).
 
 ## Pflegehinweis
 
-- Bei relevanten Content-, Contract-, Feature- oder Redaktionsaenderungen an
+- Bei relevanten Content-, Contract-, Feature- oder Redaktionsänderungen an
   diesem Endpunkt `README.md`, `README.en.md` und `VERSION` gemeinsam
-  aktualisieren.
+  berücksichtigen.
 
-## Aktueller Stand
+## Aktiver Lieferweg
 
-- GitHub-backed Primaerpfad fuer WWW-Assets:
+- GitHub-backed Primärpfad für WWW-Bilder:
   `https://cdn.jsdelivr.net/gh/RPG-Wulf/ShellRPG-cdn@main/assets/www`
-- dynv6-Fallback ist fuer lokale bzw. spaetere Deployments vorbereitet
-- die eigentliche Asset-Befuellung erfolgt ueber
-  `scripts/sync_workspace_assets.py`
-- `scripts/sync_workspace_assets.py` verankert aktuelle WWW- und Client-Assets
-  als kuratierten CDN-Bestand fuer Server- und WWW-Lieferung
+- `scripts/sync_workspace_assets.py` liest ausschließlich
+  `ShellRPG-www/public/media` und kopiert ausschließlich Bilddateien nach
+  `assets/www/public/media`.
+- Öffentliche Schreibzugriffe sind nicht vorgesehen. Befüllung erfolgt nur
+  über die kontrollierte WWW-/Deployment-Pipeline.
+- Ein dynv6-Fallback kann lokal bzw. im Deployment konfiguriert werden, muss
+  aber vor Cutover über DNS und HTTPS nachweislich erreichbar sein.
 
-## Wichtig
+## Explizit nicht erlaubt
 
-- Zugangsdaten fuer dynv6 liegen nicht in versionierten Dateien
-- reale Tokens gehoeren nur in lokal ignorierte `secrets/`- oder `var/`-Dateien
-- ein reiner dynv6-Hosteintrag ist kein echter Multi-Origin-Load-Balancer
-- wenn mehrere CDN-Urspruenge gegeneinander geraced werden sollen, muessen
-  mehrere konkrete Origin-URLs lokal in `var/asset-origins.toml` oder einer
-  vergleichbaren ignorierten Datei hinterlegt werden
-- `shell.sh` und `scripts/update_dynv6.py` loesen lokale Secretpfade stabil
-  relativ zum CDN-Endpunkt auf
-- die Assettaxonomie soll kuenftig auch Monster-, Wildlife-, Material- und
-  Ringslot-Ausbaupfade sauber tragen
+- Wiki-Inhalte oder Wiki-eigene Assets auf diesem CDN
+- `ShellRPG-client` als CDN-Quelle oder CDN-Verbraucher
+- JavaScript, CSS, JSON-Manifeste, Binärdownloads oder Anwendungen als
+  allgemeiner CDN-Payload
+- öffentliche Upload- oder Schreibschnittstellen
+
+## Legacy-Migrationszustand
+
+Die historischen Pfade `assets/client` und `manifests/www` können im Repository
+noch vorhanden sein. Sie werden vom Sync-Skript nicht mehr befüllt und gehören
+nicht mehr zum aktiven CDN-Vertrag. Ihre Entfernung ist bewusst ein
+**Post-Validation-Schritt**: erst wenn WWW-Bildlieferung, Redirects, HTTPS und
+Cache-Verhalten in Staging/Produktion erfolgreich geprüft wurden.
+
+## Sicherheit
+
+- Zugangsdaten für dynv6 liegen nicht in versionierten Dateien.
+- Reale Tokens gehören ausschließlich in lokal ignorierte `secrets/`- oder
+  `var/`-Dateien.
+- CDN-Inhalte sind öffentlich lesbar, aber nicht öffentlich schreibbar.
+- Das CDN besitzt keine API-, Session- oder Authentifizierungsverantwortung.
 
 ## Praktische Kommandos
 
@@ -46,4 +67,4 @@ python scripts/update_dynv6.py
 ./shell.sh
 ```
 
-`./shell.sh` ist ein schlanker Wrapper fuer den lokalen dynv6-Update-Job.
+`./shell.sh` bleibt ein schlanker Wrapper für den lokalen dynv6-Update-Job.
