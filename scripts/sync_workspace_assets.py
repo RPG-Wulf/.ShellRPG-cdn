@@ -4,6 +4,17 @@ import shutil
 from pathlib import Path
 
 
+IMAGE_SUFFIXES = {
+    ".gif",
+    ".ico",
+    ".jpeg",
+    ".jpg",
+    ".png",
+    ".svg",
+    ".webp",
+}
+
+
 def repo_root() -> Path:
     return Path(__file__).resolve().parents[1]
 
@@ -12,20 +23,28 @@ def workspace_root() -> Path:
     return repo_root().parent
 
 
-def copy_tree(source: Path, destination: Path) -> None:
+def copy_images(source: Path, destination: Path) -> None:
     if not source.exists():
         return
-    destination.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(source, destination, dirs_exist_ok=True)
+    for candidate in source.rglob("*"):
+        if candidate.is_symlink() or not candidate.is_file() or candidate.suffix.lower() not in IMAGE_SUFFIXES:
+            continue
+        relative = candidate.relative_to(source)
+        target = destination / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(candidate, target)
+
+
+def sync_workspace_assets(root: Path, workspace: Path) -> None:
+    copy_images(
+        workspace / "ShellRPG-www" / "public" / "media",
+        root / "assets" / "www" / "public" / "media",
+    )
 
 
 def main() -> int:
-    root = repo_root()
-    workspace = workspace_root()
-    copy_tree(workspace / "ShellRPG-www" / "public" / "media", root / "assets" / "www" / "public" / "media")
-    copy_tree(workspace / "ShellRPG-www" / "assets" / "manifest", root / "manifests" / "www")
-    copy_tree(workspace / "ShellRPG-client" / "media", root / "assets" / "client" / "media")
-    print("ShellRPG-cdn assets synchronized from workspace endpoints.")
+    sync_workspace_assets(repo_root(), workspace_root())
+    print("ShellRPG-cdn WWW images synchronized from ShellRPG-www.")
     return 0
 
 
