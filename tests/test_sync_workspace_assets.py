@@ -29,3 +29,18 @@ def test_sync_copies_only_www_images(tmp_path: Path) -> None:
     assert not (cdn / "assets" / "www" / "public" / "media" / "png" / "notes.txt").exists()
     assert not (cdn / "manifests" / "www" / "map.json").exists()
     assert not (cdn / "assets" / "client" / "media" / "client.png").exists()
+
+
+def test_sync_ignores_symlinked_images(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    cdn = tmp_path / "cdn"
+    media = workspace / "ShellRPG-www" / "public" / "media"
+    media.mkdir(parents=True)
+
+    outside = tmp_path / "outside.png"
+    outside.write_bytes(b"private")
+    (media / "linked.png").symlink_to(outside)
+
+    sync_workspace_assets(cdn, workspace)
+
+    assert not (cdn / "assets" / "www" / "public" / "media" / "linked.png").exists()
