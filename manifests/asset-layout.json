@@ -1,14 +1,23 @@
 {
-  "artifact": "shellrpg-cdn-asset-layout",
+  "artifact": "shellrpg-cdn-image-layout",
   "version": "0.8.0",
   "roots": {
-    "www": "assets/www",
-    "client": "assets/client",
-    "www_manifests": "manifests/www"
+    "www_images": "assets/www/public/media"
   },
   "delivery": {
     "github_backed_primary": "https://cdn.jsdelivr.net/gh/RPG-Wulf/ShellRPG-cdn@main/assets/www",
     "dynv6_fallback_host": "https://cdn-shellrpg.dns.army/assets/www",
-    "note": "True first-response delivery across multiple origins requires explicit origin candidates beyond a single dynv6 host entry."
+    "note": "Only WWW-owned image paths below public/media are active CDN payload."
+  },
+  "policy": {
+    "owner_endpoint": "WWW",
+    "content_scope": "images-only",
+    "public_write": false,
+    "wiki_usage": "forbidden",
+    "client_usage": "forbidden",
+    "legacy_paths_frozen_until_validation": [
+      "assets/client",
+      "manifests/www"
+    ]
   }
 }
